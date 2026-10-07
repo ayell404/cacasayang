@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Untuk kamu</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Nunito:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1:#1d1a3a; --bg2:#4a2350; --rose:#f4a6b7; --gold:#f6dfa8; --ink:#fdf3ee; --muted:#c9b8d6;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{
+    font-family:'Nunito',system-ui,sans-serif; color:var(--ink);
+    background:radial-gradient(120% 90% at 50% 100%,var(--bg2),var(--bg1) 70%);
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+  }
+  .stage{width:min(560px,92vw); text-align:center; position:relative; z-index:2}
+  h1{font-family:'Cormorant Garamond',Georgia,serif; font-style:italic; font-weight:500;
+     font-size:clamp(2.2rem,8vw,3.6rem); margin:0 0 .5rem; color:var(--gold)}
+  p.sub{color:var(--muted); margin:0 0 2rem}
+  .btn{font:inherit; font-weight:600; border:0; border-radius:999px; padding:.9rem 1.8rem; cursor:pointer;
+       background:var(--rose); color:#3a1740; transition:transform .15s}
+  .btn:hover{transform:scale(1.05)}
+  .btn:focus-visible{outline:3px solid var(--gold); outline-offset:3px}
+  .btn.ghost{background:transparent; color:var(--ink); border:1px solid var(--muted)}
+  #letter{display:none}
+  #teks{font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(1.25rem,4.6vw,1.65rem);
+        line-height:1.65; text-align:left; min-height:15rem; white-space:pre-wrap; margin:0 0 1.5rem}
+  #tanya{display:none; margin-top:.5rem}
+  #tanya h2{font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; font-size:2rem; margin:0 0 1.2rem}
+  .aksi{display:flex; gap:1rem; justify-content:center; align-items:center; min-height:4rem}
+  #terima{display:none}
+  #terima h1{margin-bottom:1rem}
+  .pemutar{position:fixed; right:14px; bottom:14px; z-index:3; display:flex; gap:.5rem; align-items:center; font-size:.85rem}
+  .pemutar .btn{padding:.55rem 1rem}
+  .pemutar label{color:var(--muted); cursor:pointer; text-decoration:underline}
+  .pemutar input{display:none}
+  .love{position:fixed; top:-30px; pointer-events:none; z-index:1; animation:jatuh linear forwards}
+  @keyframes jatuh{to{transform:translateY(110vh) rotate(40deg); opacity:.2}}
+  @media (prefers-reduced-motion:reduce){.love{display:none}.btn{transition:none}}
+</style>
+</head>
+<body>
+
+<main class="stage">
+  <section id="awal">
+    <h1 id="judul"></h1>
+    <p class="sub">baca ya permintaan maaf aku.</p>
+    <button class="btn" id="buka">Buka pesanku</button>
+  </section>
+
+  <section id="letter">
+    <div id="teks" aria-live="polite"></div>
+    <div id="tanya">
+      <h2 id="pertanyaan"></h2>
+      <div class="aksi">
+        <button class="btn" id="ya">ya, aku maafin</button>
+        <button class="btn ghost" id="tidak">ga dulu</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="terima">
+    <h1>terima kasih caca sayanggg.</h1>
+    <p class="sub" id="janji"></p>
+  </section>
+</main>
+
+<div class="pemutar">
+  <button class="btn ghost" id="musik" aria-label="Putar atau jeda musik">Jeda musik</button>
+  <label>Pilih lagu<input type="file" id="berkas" accept="audio/*"></label>
+</div>
+
+<audio id="lagu" src="sempurna.mp3" loop preload="auto"></audio>
+
+<script>
+/* ====== UBAH BAGIAN INI ====== */
+const NAMA_PASANGAN = "caca sayang";   // contoh: "Dinda"
+const NAMA_KAMU     = "ayell 	 ";      // contoh: "Rizky"
+const PESAN = [
+  "aku minta maaf karena bikin kamu salah paham.",
+  "tapi gaaada sedikitpun niat aku buat boongin kamu",
+  "kenyataannya memang sesuai sama yang aku jelasin",
+  "im so sorry for everything yap, i love youu.",
+];
+const PERTANYAAN = "maafin aku yaa";
+const JANJI = "akuu gaakan pernah mau boongin kamu.";
+/* =============================== */
+
+const $ = id => document.getElementById(id);
+const lagu = $("lagu");
+$("judul").textContent = "Untuk caca " + NAMA_PASANGAN;
+$("pertanyaan").textContent = PERTANYAAN;
+$("janji").textContent = JANJI +  + NAMA_KAMU;
+
+// Musik hanya bisa mulai setelah ada klik (aturan browser)
+function mulaiMusik(){ lagu.volume = 0.6; lagu.play().then(()=> $("musik").textContent="Jeda musik").catch(()=>{ $("musik").textContent="Putar musik"; }); }
+$("musik").onclick = () => { if (lagu.paused) mulaiMusik(); else { lagu.pause(); $("musik").textContent="Putar musik"; } };
+$("berkas").onchange = e => { const f = e.target.files[0]; if(f){ lagu.src = URL.createObjectURL(f); mulaiMusik(); } };
+
+// Ketik pesan perlahan
+function ketik(teks, el, cb){
+  let i = 0;
+  (function t(){ el.textContent += teks[i++]; if(i < teks.length) setTimeout(t, 38); else cb && cb(); })();
+}
+function tampilkanPesan(n = 0){
+  if(n >= PESAN.length){ $("tanya").style.display = "block"; return; }
+  ketik(PESAN[n] + "\n\n", $("teks"), () => setTimeout(() => tampilkanPesan(n + 1), 700));
+}
+
+$("buka").onclick = () => {
+  mulaiMusik();
+  $("awal").style.display = "none";
+  $("letter").style.display = "block";
+  tampilkanPesan();
+};
+
+// Tombol "Belum dulu" mengecil dan menghindar, tombol "Iya" membesar
+let skala = 1;
+function hindar(){
+  skala += 0.18;
+  $("ya").style.transform = "scale(" + skala + ")";
+  const b = $("tidak");
+  b.style.transform = "translate(" + (Math.random()*140-70) + "px," + (Math.random()*60-30) + "px) scale(" + Math.max(.5, 1 - (skala-1)*.5) + ")";
+}
+$("tidak").addEventListener("mouseenter", hindar);
+$("tidak").addEventListener("click", hindar);
+
+// Hujan hati
+function hati(){
+  const h = document.createElement("div");
+  h.className = "love"; h.textContent = ["♥","❤","💗"][Math.floor(Math.random()*3)];
+  h.style.left = Math.random()*100 + "vw";
+  h.style.fontSize = (14 + Math.random()*26) + "px";
+  h.style.color = "#f4a6b7";
+  h.style.animationDuration = (4 + Math.random()*4) + "s";
+  document.body.appendChild(h);
+  setTimeout(() => h.remove(), 8500);
+}
+$("ya").onclick = () => {
+  $("letter").style.display = "none";
+  $("terima").style.display = "block";
+  setInterval(hati, 220);
+};
+</script>
+</body>
+</html>
